@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html ng-app="fidelApp">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Calcoolator</title>
+		<base href="/">
+		<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
+		<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.css">
+		<link rel="stylesheet" href="stylesheets/style.css">
+		<link rel="stylesheet" href="stylesheets/leaflet.css">
+		<link rel="stylesheet" href="Leaflet.awesome-markers/dist/leaflet.awesome-markers.css">
+	</head>
+	<body>
+		<script src="angular/angular.min.js"></script>
+		<script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+        <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+		<script src="leaflet/leaflet.js"></script>
+		<script src="leaflet/angular-leaflet-directive.js"></script>
+		<script src="Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
+		<script src="app.js"></script>
+		<script src="common/services/geocoding.service.js"></script>
+		<script src="testing/testing.controller.js"></script>
+		<div ng-app="calcoolator" ng-controller="calcoolatorCtrl as vm">
+			<div class="section">
+			  <div class="container">
+			    <div class="row">
+			      <div class="col-md-12">
+			        <h1 class="text-info text-left">Price Calculator</h1>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			<div class="section">
+			  <div class="container">
+			    <div class="row">
+			      <div class="col-md-6">
+			        <form role="form" id="Calculator" name="Calculator" ng-submit="vm.onSubmit()">
+			          <div class="form-group">
+			              <input class="form-control" type="email" placeholder="email" ng-model="vm.formData.email" required="required">
+			          </div>
+			          <div class="form-group">
+			            <div class="input-group">
+			              <input class="form-control" type="text" placeholder="address" ng-model="vm.formData.address" required="required">
+			              <span class="input-group-btn">
+			                <button class="fa fa-search btn btn-default" ng-click="vm.searchByAddress()"></button>
+			              </span>
+			            </div>
+			          </div>
+			          <div class="form-group">
+			          <label class="control-label">Nº of rooms</label>
+			            <input class="form-control" type="number" min="0" max="15" placeholder="rooms" ng-model="vm.formData.rooms" required="required"></input>
+			          </div>
+			          <button type="submit" class="btn btn-info">Submit</button>
+			          <!--button type="button" class="btn btn-warning" ng-click="vm.printCoords()">Print Coords</button-->
+			        </form>
+			      </div>
+			      <div class="col-md-6">
+			        <leaflet id="mapid" lf-center="ist" bounds="bounds" markers="markers" event-broadcast="events" width="100%" height="400px"></leaflet>
+			      </div>
+			    </div>
+			  </div>
+			</div>
+			<div class="section">
+				<div class="container">
+					<div class="row">
+						<div class="col-md-12">
+							<h3>total price: {{totalPrice}}</h3>
+							<h3>total days counted: {{totalDays}}</h3>
+							<h2>RECOMENDED PRICE: {{averagePrice | number:0}}&euro;</h2>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			var app = angular.module('calcoolator', []);
+			app.controller("calcoolatorCtrl", function($http, $q, $scope, $location, $routeParams, fidelData, leafletData, geocoding){
+				var vm = this;
+				angular.extend($scope, {
+					ist: {
+						lat: 40.3130432088809,
+						lng: -6.591796875,
+						zoom: 5
+					},
+					bounds: {
+						northEast:{
+		                  lat: 0,
+		                  lng: 0,
+		                },
+		                southWest:{
+		                  lat:0,
+		                  lng:0,
+		                }
+					},
+					center:{
+						lat: 51.505,
+		                lng: -0.09,
+		                zoom: 4
+		            },
+		            awesomeMarkerIcon:{
+		            	type: 'awesomeMarker',
+		            	prefix: 'fa',
+		            	icon: 'tag',
+		            	markerColor: 'red'
+		            },
+					events: {}
+				});
+
+				vm.formData= {
+					email : "filipe.teix@hotmail.com",
+					address: "Instituto Superior Técnico",
+					rooms : null,
+					lat: null,
+					lng: null
+				};
+				vm.results = new Array();
+				$scope.totalDays = 0;
+				$scope.totalPrice = 0;
+				$scope.averagePrice = 0;
+
+				$scope.markers = new Array();
+				$scope.markers.push({
+					draggable: true
+				});
+
+				$scope.margin = {
+					nelatmargin:0.0035434634656965613,
+					nelngmargin:0.007124260963644602,
+					swlatmargin:0.0031515641431596464,
+					swlngmargin:0.008325262962136648
+				}
+
+
+				$scope.$on("leafletDirectiveMarker.mapid.dragend", function(event, args){
+					$scope.markers[0].lat = args.model.lat;
+					$scope.markers[0].lng = args.model.lng;
+
+					vm.formData.lat = $scope.markers[0].lat;
+					vm.formData.lng = $scope.markers[0].lng;
+				});
+
+				$scope.$on("leafletDirectiveMap.mapid.click", function(event, args){
+					var leafEvent = args.leafletEvent;
+
+					$scope.markers[0].lat = leafEvent.latlng.lat;
+					$scope.markers[0].lng = leafEvent.latlng.lng;
+
+					vm.formData.lat = $scope.markers[0].lat;
+					vm.formData.lng = $scope.markers[0].lng;
+				});
+
+				vm.clearMarkers = function(){
+					$scope.markers.length = 1;
+				};
+
+				var nominatim = function(address){
+					console.log("running nominatim search");
+					console.log(address);
+					var def = $q.defer();
+					$http.get('http://nominatim.openstreetmap.org/search', {params: {format: 'json', limit:1, q:address}}).then(function(data){
+						console.log(data);
+						if(data.data.length > 0){
+							def.resolve(data.data[0]);
+						} else {
+							def.reject('Invalid address for nominatim service');
+						}
+					});
+
+					return def.promise;
+				};
+
+				vm.searchByAddress = function(){
+					//$scope.bounds.address = vm.formData.address;
+					nominatim(vm.formData.address).then(function(data){
+						var b = data.boundingbox;
+						$scope.bounds = {
+							northEast: {
+								lat: Number(b[1]),
+								lng: Number(b[3])
+							},
+							southWest: {
+								lat: Number(b[0]),
+								lng: Number(b[2])
+							}
+						};
+						$scope.markers[0].lat = Number(data.lat);
+						$scope.markers[0].lng = Number(data.lon);
+						$scope.markers[0].message = data.display_name;
+					}).catch(function(err){
+						console.log(err);
+					});
+				};
+
+				vm.airbnbBB = function(neLat, neLng, swLat, swLng, rooms){
+					var df = $q.defer();
+					$http.get('https://cors-anywhere.herokuapp.com/https://www.airbnb.pt/search/search_results',{
+						params:{
+							ss_preload: 'true',
+							source: 'bb',
+							page: '1',
+							ne_lat: neLat,
+							ne_lng: neLng,
+							sw_lat: swLat,
+							sw_lng: swLng,
+							search_by_map: 'true',
+							min_bedrooms: rooms
+						}
+					}).then(function(response){
+						df.resolve(response);
+					}).catch(function(error){
+						df.reject(error);
+					});
+					return df.promise;
+				};
+
+				vm.airbnbById  = function(listingid, startMonth, startYear){
+					var df = $q.defer();
+					$http.get('https://cors-anywhere.herokuapp.com/https://www.airbnb.pt/api/v2/calendar_months', {
+						params:{
+							key: 'd306zoyjsyarp7ifhu67rjxn52tv0t20',
+							currency: 'EUR',
+							locale: 'pt-PT',
+							listing_id: listingid,
+							month: startMonth,
+							year: startYear,
+							count: '12',
+							_format: 'with_conditions'
+						}
+					}).then(function(response){
+						df.resolve(response);
+					}).catch(function(error){
+						df.reject(error);
+					});
+					return df.promise;
+				};
+
+				vm.middleware = function(rooms, response){
+					var df = $q.defer();
+					var currentDate = new Date();
+					var startMonth = currentDate.getMonth() + 1;
+					var startYear = currentDate.getYear() + 1900;
+					var tempTotalPrice = 0;
+					var tempTotalDays = 0;
+					var totalMonths = 12;
+					console.log("curDate: " + currentDate);
+					console.log("startMonth: " + startMonth);
+					var totalListings = response.data.results_json.search_results.length;
+					console.log("totalListings: " + totalListings);
+					angular.forEach(response.data.results_json.search_results, function(result){
+						if(result.listing.bedrooms !== rooms){
+							totalListings = totalListings - 1;
+							console.log("found a place with more rooms than requested");
+						} else {
+							$scope.markers.push({
+								lat:result.listing.lat,
+								lng:result.listing.lng,
+								id: result.listing.id
+							});
+							vm.airbnbById(result.listing.id, startMonth, startYear).then(function(response){
+								console.log(response);
+								angular.forEach(response.data.calendar_months, function(month){
+									angular.forEach(month.days, function(day){
+										totalMonths = totalMonths - 1;
+										tempTotalDays = tempTotalDays + 1;
+										tempTotalPrice = tempTotalPrice + day.price.local_price;
+									});
+								});
+								totalListings = totalListings - 1;
+								if(totalListings === 0){
+									console.log("days: " + tempTotalDays);
+									console.log("price: " + tempTotalPrice);
+									var result = {
+										totalDays : tempTotalDays,
+										totalPrice : tempTotalPrice
+									};
+									df.resolve(result);
+								}
+							}).catch(function(error){
+								console.log(error);
+								df.reject(error);
+							});
+						}
+					});
+					return df.promise; 
+				}
+
+				vm.doAirbnbSearch = function(rooms, nelatmargin, nelngmargin, swlatmargin, swlngmargin){
+
+					var lat = $scope.markers[0].lat;
+					var lng = $scope.markers[0].lng;
+					var nelat = lat + nelatmargin;
+					var nelng = lng + nelngmargin;
+					var swlat = lat - swlatmargin;
+					var swlng = lng - swlngmargin;
+					vm.airbnbBB(nelat, nelng, swlat, swlng, rooms).then(function(response){
+						console.log(response);
+						vm.middleware(rooms, response).then(function(response){
+							$scope.totalPrice = response.totalPrice;
+							$scope.totalDays = response.totalDays;
+							$scope.averagePrice = $scope.totalPrice / $scope.totalDays;
+						});
+					}).catch(function(error){
+						console.log(error);
+					});
+				};
+
+
+				vm.showError = function(error) {
+					$scope.$apply(function(){
+						vm.message = error.message;
+					});
+				};
+
+				vm.onSubmit = function(){
+					vm.formError = "";
+					vm.formData.lat = $scope.markers[0].lat;
+					vm.formData.lng = $scope.markers[0].lng;
+					console.log("Got to onSubmit");
+					if(!vm.formData.email || !vm.formData.rooms || !vm.formData.address || !vm.formData.lng || !vm.formData.lat){
+						vm.formError = "All fields required, please try again";
+					} else {
+					vm.doAirbnbSearch(vm.formData.rooms, $scope.margin.nelatmargin, $scope.margin.nelngmargin, $scope.margin.swlatmargin, $scope.margin.swlngmargin);
+					};
+				};
+
+			})
+		</script>
+	</body>
+</html>
