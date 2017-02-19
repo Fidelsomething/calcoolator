@@ -61,8 +61,8 @@
 			</div>
 		</div>
 		<script>
-			var app = angular.module('calcoolator', []);
-			app.controller("calcoolatorCtrl", function($http, $q, $scope, $location, $routeParams, fidelData, leafletData, geocoding){
+			var app = angular.module('calcoolator', ['leaflet-directive']);
+			app.controller("calcoolatorCtrl", function($http, $q, $scope, $location, $routeParams, leafletData){
 				var vm = this;
 				angular.extend($scope, {
 					ist: {
