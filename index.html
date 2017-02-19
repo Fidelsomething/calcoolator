@@ -10,6 +10,7 @@
 		<link rel="stylesheet" href="stylesheets/style.css">
 		<link rel="stylesheet" href="stylesheets/leaflet.css">
 		<link rel="stylesheet" href="Leaflet.awesome-markers/dist/leaflet.awesome-markers.css">
+		<link rel='stylesheet' href='//cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.css' type='text/css' media='all' />
 	</head>
 	<body>
 		<script src="angular/angular.min.js"></script>
@@ -18,6 +19,7 @@
 		<script src="leaflet/leaflet.js"></script>
 		<script src="leaflet/angular-leaflet-directive.js"></script>
 		<script src="Leaflet.awesome-markers/dist/leaflet.awesome-markers.js"></script>
+		<script type='text/javascript' src='//cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.js'></script>
 		<div ng-controller="calcoolatorCtrl as vm">
 			<div class="section">
 			  <div class="container">
@@ -61,7 +63,7 @@
 			</div>
 		</div>
 		<script>
-			var app = angular.module('calcoolator', ['leaflet-directive']);
+			var app = angular.module('calcoolator', ['leaflet-directive', 'angular-loading-bar']);
 			app.controller("calcoolatorCtrl", function($http, $q, $scope, $location, $routeParams, leafletData){
 				var vm = this;
 				angular.extend($scope, {
