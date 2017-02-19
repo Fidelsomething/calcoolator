@@ -1,34 +1,29 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="calcoolator">
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Calcoolator</title>
 		<base href="/">
 		<link rel="stylesheet" type="text/css" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css">
-		<link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.css">
-		<link rel="stylesheet" href="stylesheets/style.css">
-		<link rel="stylesheet" href="stylesheets/leaflet.css">
-		<link rel="stylesheet" href="Leaflet.awesome-markers/dist/leaflet.awesome-markers.css">
+		<link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7/leaflet.css" />
+    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/leaflet_awesome/leaflet_awesome_markers.css">
 		<link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.css' type='text/css' media='all' />
 
 
-	 <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
-	 <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-	 <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular.min.js"></script>
+  <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
 
-	 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.3/dist/leaflet.css" />
-	 <script src="https://unpkg.com/leaflet@1.0.3/dist/leaflet.js"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/angular-leaflet-directive/0.10.0/angular-leaflet-directive.min.js"></script>
+  <script type="text/javascript" src="http://netdna.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.3/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-leaflet-directive/0.10.0/angular-leaflet-directive.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
+  <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.js'></script>
 
-
-
-	 <script src="https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.min.js"></script>
-	 <script type='text/javascript' src='https://cdnjs.cloudflare.com/ajax/libs/angular-loading-bar/0.9.0/loading-bar.min.js'></script>
-
-	</head>
-	<body ng-app>
-
+  </head>
+	<body>
 
 		<div ng-controller="calcoolatorCtrl as vm">
 			<div class="section">
@@ -105,7 +100,6 @@
 		            },
 					events: {}
 				});
-
 				vm.formData= {
 					email : "filipe.teix@hotmail.com",
 					address: "Instituto Superior Técnico",
@@ -117,42 +111,32 @@
 				$scope.totalDays = 0;
 				$scope.totalPrice = 0;
 				$scope.averagePrice = 0;
-
 				$scope.markers = new Array();
 				$scope.markers.push({
 					draggable: true
 				});
-
 				$scope.margin = {
 					nelatmargin:0.0035434634656965613,
 					nelngmargin:0.007124260963644602,
 					swlatmargin:0.0031515641431596464,
 					swlngmargin:0.008325262962136648
 				}
-
-
 				$scope.$on("leafletDirectiveMarker.mapid.dragend", function(event, args){
 					$scope.markers[0].lat = args.model.lat;
 					$scope.markers[0].lng = args.model.lng;
-
 					vm.formData.lat = $scope.markers[0].lat;
 					vm.formData.lng = $scope.markers[0].lng;
 				});
-
 				$scope.$on("leafletDirectiveMap.mapid.click", function(event, args){
 					var leafEvent = args.leafletEvent;
-
 					$scope.markers[0].lat = leafEvent.latlng.lat;
 					$scope.markers[0].lng = leafEvent.latlng.lng;
-
 					vm.formData.lat = $scope.markers[0].lat;
 					vm.formData.lng = $scope.markers[0].lng;
 				});
-
 				vm.clearMarkers = function(){
 					$scope.markers.length = 1;
 				};
-
 				var nominatim = function(address){
 					console.log("running nominatim search");
 					console.log(address);
@@ -165,10 +149,8 @@
 							def.reject('Invalid address for nominatim service');
 						}
 					});
-
 					return def.promise;
 				};
-
 				vm.searchByAddress = function(){
 					//$scope.bounds.address = vm.formData.address;
 					nominatim(vm.formData.address).then(function(data){
@@ -190,7 +172,6 @@
 						console.log(err);
 					});
 				};
-
 				vm.airbnbBB = function(neLat, neLng, swLat, swLng, rooms){
 					var df = $q.defer();
 					$http.get('https://cors-anywhere.herokuapp.com/https://www.airbnb.pt/search/search_results',{
@@ -212,7 +193,6 @@
 					});
 					return df.promise;
 				};
-
 				vm.airbnbById  = function(listingid, startMonth, startYear){
 					var df = $q.defer();
 					$http.get('https://cors-anywhere.herokuapp.com/https://www.airbnb.pt/api/v2/calendar_months', {
@@ -233,7 +213,6 @@
 					});
 					return df.promise;
 				};
-
 				vm.middleware = function(rooms, response){
 					var df = $q.defer();
 					var currentDate = new Date();
@@ -283,9 +262,7 @@
 					});
 					return df.promise;
 				}
-
 				vm.doAirbnbSearch = function(rooms, nelatmargin, nelngmargin, swlatmargin, swlngmargin){
-
 					var lat = $scope.markers[0].lat;
 					var lng = $scope.markers[0].lng;
 					var nelat = lat + nelatmargin;
@@ -303,14 +280,11 @@
 						console.log(error);
 					});
 				};
-
-
 				vm.showError = function(error) {
 					$scope.$apply(function(){
 						vm.message = error.message;
 					});
 				};
-
 				vm.onSubmit = function(){
 					vm.formError = "";
 					vm.formData.lat = $scope.markers[0].lat;
@@ -322,7 +296,6 @@
 					vm.doAirbnbSearch(vm.formData.rooms, $scope.margin.nelatmargin, $scope.margin.nelngmargin, $scope.margin.swlatmargin, $scope.margin.swlngmargin);
 					};
 				};
-
 			})
 		</script>
 	</body>
