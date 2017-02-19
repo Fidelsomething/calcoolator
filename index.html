@@ -49,7 +49,8 @@
 			            <input class="form-control" type="number" min="0" max="15" placeholder="rooms" ng-model="vm.formData.rooms" required="required"></input>
 			          </div>
 			          <button type="submit" class="btn btn-info">Submit</button>
-			          <!--button type="button" class="btn btn-warning" ng-click="vm.printCoords()">Print Coords</button-->
+			          <h3 class="text-info text-left">Recommended Price </h3>
+          			  <h4>{{averagePrice | number:0}}&euro;</h4>
 			        </form>
 			      </div>
 			      <div class="col-md-6">
@@ -57,17 +58,6 @@
 			      </div>
 			    </div>
 			  </div>
-			</div>
-			<div class="section">
-				<div class="container">
-					<div class="row">
-						<div class="col-md-12">
-							<h3>total price: {{totalPrice}}</h3>
-							<h3>total days counted: {{totalDays}}</h3>
-							<h2>RECOMENDED PRICE: {{averagePrice | number:0}}&euro;</h2>
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 		<script>
