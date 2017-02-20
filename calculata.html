@@ -229,8 +229,8 @@
 					events: {}
 				});
 				vm.formData= {
-					email : "filipe.teix@hotmail.com",
-					address: "Instituto Superior Técnico",
+					email : "",
+					address: "",
 					rooms : null,
 					lat: null,
 					lng: null
@@ -358,11 +358,11 @@
 							totalListings = totalListings - 1;
 							console.log("found a place with more rooms than requested");
 						} else {
-							$scope.markers.push({
+							/*$scope.markers.push({
 								lat:result.listing.lat,
 								lng:result.listing.lng,
 								id: result.listing.id
-							});
+							});*/
 							vm.airbnbById(result.listing.id, startMonth, startYear).then(function(response){
 								console.log(response);
 								angular.forEach(response.data.calendar_months, function(month){
