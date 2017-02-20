@@ -157,15 +157,6 @@
 			<div class="section">
 			  <div class="container">
 			    <div class="row">
-			      <div class="col-md-12">
-			        <h1 class="text-info text-left">Price Calculator</h1>
-			      </div>
-			    </div>
-			  </div>
-			</div>
-			<div class="section">
-			  <div class="container">
-			    <div class="row">
 			      <div class="col-md-6">
 			        <form role="form" id="Calculator" name="Calculator" ng-submit="vm.onSubmit()">
 			          <div class="form-group">
@@ -175,16 +166,16 @@
 			            <div class="input-group">
 			              <input class="form-control" type="text" placeholder="address" ng-model="vm.formData.address" required="required">
 			              <span class="input-group-btn">
-			                <button class="fa fa-search btn btn-default" ng-click="vm.searchByAddress()"></button>
+			                <button class="btn btn-default" ng-click="vm.searchByAddress()"><span class="fa et-down fa-search"></span></button>
 			              </span>
 			            </div>
 			          </div>
 			          <div class="form-group">
-			          <label class="control-label">Nº of rooms<span class="fa et-down fa-search"></span></label>
-			            <input class="form-control" type="number" min="0" max="15" placeholder="rooms" ng-model="vm.formData.rooms" required="required"></input>
+			          <label class="control-label">Nº of rooms</label>
+			            <input class="form-control" type="number" min="1" max="15" placeholder="rooms" ng-model="vm.formData.rooms" required="required"></input>
 			          </div>
 			          <button type="submit" class="btn btn-info">Submit</button>
-			          <h3 class="text-info text-left">Recommended Price <span class="fa et-down fa-search"></span></h3>
+			          <h3 class="text-info text-left">Recommended Price</h3>
           			  <h4>{{averagePrice | number:0}}&euro;</h4>
 			        </form>
 			      </div>
